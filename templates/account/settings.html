@@ -1,0 +1,169 @@
+{% extends 'layout.html' %}
+
+{% load static %}
+
+{% block title %} Settings {% endblock title %} 
+
+
+{% block content %}
+
+<div class="container publish">
+    <h1>Kullanıcı Ayarları</h1>
+    <hr>
+        
+        <div class="mb-3" data-bs-toggle="modal" data-bs-target="#modal1">
+            <label for="username" class="form-label">Kullanıcı Adı:  {{ user.username }}</label>
+        </div>
+
+
+        <div class="mb-3" data-bs-toggle="modal" data-bs-target="#modal2">
+            <label for="email" class="form-label">E-posta Adresiniz:  {{ user.email }}</label>
+        </div>
+
+        <div class="mb-3" data-bs-toggle="modal" data-bs-target="#modal3">
+            <label for="password" class="form-label">Şifreniz: ******************* </label>
+        </div>            
+
+
+
+    <div class="d-flex justify-content-center">
+    
+        <div class="mx-3 mb-3" data-bs-toggle="modal" data-bs-target="#modal5">
+            <button class="btn btn-danger">Hesabı Sil</button>
+        </div>
+
+        <div class="mx-3 mb-3">
+            <a href="{% url 'update' %}" class="btn btn-danger"> Yazar Hesabını Etkinleştir </a>
+        </div>
+    </div>
+    
+    
+
+</div>
+
+<!-- kullanıcı adı değişimi -->
+<div class="modal fade" id="modal1">
+    <div class="modal-dialog custom-modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <form action="{% url 'usernamechange' %}" method="POST">
+                {% csrf_token %}
+            <div class="modal-header">
+                <h4 class="modal-title">Kullanıcı Adını Güncelle</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <div class="modal-body">
+                <div class="">
+                    <label for="floatingInput" class="col-form-label">Kullanıcı Adı</label>
+                    <input type="text" name="username" class="form-control" id="username">
+                </div>
+
+
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
+                <button type="submit" class="btn btnRenk">Güncelle</button>
+            </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+ <!-- eposta değişimi -->
+ <div class="modal fade" id="modal2">
+    <div class="modal-dialog custom-modal-dialog">
+        <div class="modal-content">
+            <form action="{% url 'emailchange' %}" method="POST">
+                {% csrf_token %}
+            <div class="modal-header">
+                <h4 class="modal-title">E-postanı Güncelle</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <div class="modal-body">
+                <div class="">
+                    <label for="floatingInput" class="col-form-label">E-posta</label>
+                    <input type="email" name="email" class="form-control" id="email">
+                </div>
+
+
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
+                <button type="submit" class="btn btnRenk">Kaydet</button>
+            </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+  <!-- şifre değişimi -->
+  <div class="modal fade" id="modal3">
+    <div class="modal-dialog custom-modal-dialog">
+        <div class="modal-content">
+            <form action="{% url 'passwordchange' %}" method="POST">
+                {% csrf_token %}
+            <div class="modal-header">
+                <h4 class="modal-title">Şifreni Güncelle</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <div class="modal-body">
+                <div class="">
+                    <label for="floatingInput" class="col-form-label">Şifreniz</label>
+                    <input type="password" name="password" class="form-control" id="password">
+                </div>
+
+                <div class="mt-2">
+                    <label for="floatingInput" class="col-form-label">Yeni Şifreniz</label>
+                    <input type="password" name="repassword" class="form-control" id="repassword">
+                </div>
+
+
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
+                <button type="submit" class="btn btnRenk">Güncelle</button>
+            </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+ <!-- Hesap Sil -->
+ <div class="modal fade" id="modal5">
+    <div class="modal-dialog custom-modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <form action="userremove">
+            <div class="modal-header">
+                <h4 class="modal-title">Hesap Silme</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <div class="modal-body">
+                <div class="">
+                   <p>Hesabınız silindiğinde, profiliniz, yazılarınız, yayınlarınız, notlarınız ve cevaplarınız 
+                    dahil olmak üzere tüm içeriğiniz kalıcı olarak silinecektir.</p>
+                </div>
+
+
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
+                <button type="submit" class="btn btn-danger">Sil</button>
+            </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+{% endblock content %}
