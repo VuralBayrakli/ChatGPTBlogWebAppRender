@@ -9,4 +9,6 @@ RUN pip install -r /requirements.txt
 COPY . .
 
 EXPOSE 8000
-CMD ["python", "manage.py", "runserver", "--host", "${RENDER_EXTERNAL_HOSTNAME}", "--port", "${PORT}"]
+USER ChatGPTBlogWebAppRender
+
+CMD ["run.sh"]
