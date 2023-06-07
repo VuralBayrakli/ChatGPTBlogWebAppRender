@@ -9,7 +9,7 @@ services:
     
     image: django1
     container_name: django_container1
-    command: python manage.py runserver
+    command: gunicorn grup_14.wsgi:application --bind 0.0.0.0:8000
     depends_on:
       - db
       - zemberek
