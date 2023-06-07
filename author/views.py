@@ -90,8 +90,11 @@ def publish(request, draft_id):
                     blog.tags.add(*form.cleaned_data["tags"])
                     return redirect("panel")
         else:
-            tags = ",".join([tag.name for tag in blog.tags.all()])
-            form = PublishForm(instance=blog, initial={"tags":tags})
+            if blog:
+                tags = ",".join([tag.name for tag in blog.tags.all()])
+                form = PublishForm(instance=blog, initial={"tags":tags})
+            else:
+                form = PublishForm()
 
         return render(request, "author/publish.html", {"form":form})
     else:
