@@ -9,8 +9,6 @@ COPY ./requirements.txt /requirements.txt
 
 RUN pip install -r /requirements.txt
 
-COPY run.sh /run.sh
-RUN chmod +x /run.sh
 
 COPY . .
 EXPOSE 8000
