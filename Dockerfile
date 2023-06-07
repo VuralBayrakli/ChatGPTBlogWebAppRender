@@ -16,6 +16,6 @@ RUN pip install -r /requirements.txt
 
 COPY . .
 EXPOSE 8000
-CMD ["docker-compose", "up", "-d"]
+CMD ["gunicorn", "grup_14.wsgi:application", "--bind", "0.0.0.0:8000"]
 
 
