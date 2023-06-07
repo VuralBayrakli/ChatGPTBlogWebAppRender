@@ -1,6 +1,4 @@
 FROM python:3.9-alpine3.13
-FROM docker:20.10.5-dind
-
 
 
 
