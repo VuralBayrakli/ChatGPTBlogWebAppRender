@@ -84,17 +84,17 @@ WSGI_APPLICATION = 'grup_14.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
 
-'''DATABASES = {
+DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'grup_14',
         'USER': 'postgres',
         'PASSWORD': 'Vural',
-        'HOST': 'db', # 3.86.161.21
+        'HOST': '34.66.201.177', # 3.86.161.21
         'PORT': 5432,
     }
 }
-'''
+
 '''DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
@@ -102,9 +102,9 @@ WSGI_APPLICATION = 'grup_14.wsgi.application'
     }
 }'''
 
-DATABASES = {
+'''DATABASES = {
     'default': dj_database_url.parse(os.environ.get('DATABASE_URL'))    
-}
+}'''
 
 
 

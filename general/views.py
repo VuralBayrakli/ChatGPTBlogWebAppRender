@@ -35,7 +35,7 @@ def search_tag(request, tag):
     blogs = Blog.objects.filter(tags__name__in=[tag]).order_by('-interaction', '-date')
     return render(request, 'general/index.html', {"blogs":blogs})
 
-'''def koklerine_ayir(text):
+def koklerine_ayir(text):
     object1 = MyService()
     punctuation = [".", ",", "?", "!", ":", ";", "'", '"', "(", ")", "[", "]", "{", "}" ]
     
@@ -144,12 +144,13 @@ def get_post_for_following(user):
     followings = user.following.all()
     posts_for_followings = Blog.objects.filter(author__in=[r.following for r in followings]).order_by('-interaction', '-date') # takip edilenlerin gönderileri
     #posts_for_followings = posts_for_followings.exclude(liked_by__user=user) # kullanıcının beğendiği gönderileri çıkar
-    return posts_for_followings'''
+    return posts_for_followings
 
 def index(request):
-    #query1 = request.GET.get('query')
+    query1 = request.GET.get('query')
+    print(query1)
     blogs = Blog.objects.all().order_by('-date')
-
+    
     # En çok okunan gönderiler
     most_read_posts = Blog.objects.all().order_by('-interaction', '-date')[:10]
     
@@ -158,7 +159,7 @@ def index(request):
 
     # En çok beğenilen 10 gönderi
     most_liked_posts = Blog.objects.annotate(like_count=Count('likes')).order_by('-like_count')[:10]'''
-    return render(request, 'general/index.html', {'blogs': blogs})
+    
     if request.user.is_authenticated:
         user = request.user
 
@@ -166,7 +167,7 @@ def index(request):
         followings = user.following.all()
 
         # Takip edilenlerin gönderileri
-        '''posts_for_followings = get_post_for_following(user)
+        posts_for_followings = get_post_for_following(user)
 
         # Önerilen gönderiler
         recommended_posts = get_recommendations(user=request.user, limit=10)
@@ -178,10 +179,10 @@ def index(request):
             followers = author.followers.all()         
             
         except:
-            author = None'''
+            author = None
 
     # Arama yapıldıysa
-    '''if query1:
+    if query1:
         
         # Metin arama
         posts = metni_ara(query1)
@@ -190,11 +191,13 @@ def index(request):
         # Yazar arama
         author_results = author_search(query1)
         author_results = Author.objects.filter(id__in=[r[1] for r in author_results])
+        print("author_results")
+        print(author_results)
         author_blogs = Blog.objects.filter(author__in=author_results).order_by('-interaction', '-date')
         
 
-        return render(request, 'general/index.html', {'blogs': posts, 'user_profile': user_profile, 'authors': author_results, 'query': query1, 'author_blogs': author_blogs, 'most_read_posts': most_read_posts, 'posts_with_most_common_tags': posts_with_most_common_tags, 'most_liked_posts': most_liked_posts, 'posts_for_followings': posts_for_followings})
-'''
+        return render(request, 'general/index.html', {'blogs': posts, 'authors': author_results, 'query': query1, 'author_blogs': author_blogs, 'most_read_posts': most_read_posts})
+
     # Arama yapılmadıysa       
     if request.method == "GET":
         blogs = Blog.objects.all()
