@@ -8,11 +8,10 @@ WORKDIR /ChatGPTBlogWebAppRender
 COPY ./requirements.txt /requirements.txt
 COPY . .
 
-COPY ./docker-compose.yml /opt/render/project/src/docker-compose.yml
 
 RUN pip install -r /requirements.txt
-COPY ./entrypoint.sh /
-ENTRYPOINT [ "sh", "/entrypoint.sh" ]
+
+CMD [ "python", "manage.py", "runserver", "0.0.0.0:8000" ]
 
 
 
