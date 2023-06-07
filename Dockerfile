@@ -14,6 +14,6 @@ RUN chmod +x /run.sh
 
 COPY . .
 EXPOSE 8000
-CMD ["/run.sh"]
+CMD ["run.sh"]
 
 
