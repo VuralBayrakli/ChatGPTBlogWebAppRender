@@ -10,10 +10,10 @@ COPY ./requirements.txt /requirements.txt
 
 RUN pip install -r /requirements.txt
 
-
+COPY ./docker-compose.yml /docker-compose.yml
 
 COPY . .
 EXPOSE 8000
-CMD ["docker-compose", "build", "&&", "docker-compose", "up"]
+CMD ["docker-compose", "build"]
 
 
