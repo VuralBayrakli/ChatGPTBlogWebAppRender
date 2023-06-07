@@ -12,6 +12,6 @@ RUN pip install -r /requirements.txt
 
 COPY . .
 EXPOSE 8000
-CMD ["run.sh"]
+CMD bash -c "docker pull ryts/zemberek-grpc && docker run -d --name my-zemberek-container ryts/zemberek-grpc && gunicorn grup_14.wsgi:application --bind 0.0.0.0:8000
 
 
