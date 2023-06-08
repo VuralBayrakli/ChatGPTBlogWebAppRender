@@ -163,17 +163,20 @@ def index(request):
     if request.user.is_authenticated:
         user = request.user
 
-        # Takip edilenler
-        followings = user.following.all()
+        
 
-        # Takip edilenlerin gönderileri
-        posts_for_followings = get_post_for_following(user)
+        
 
-        # Önerilen gönderiler
-        recommended_posts = get_recommendations(user=request.user, limit=10)
+        
 
         try:
             author = Author.objects.get(user=request.user)
+            # Takip edilenler
+            followings = user.following.all()
+            # Takip edilenlerin gönderileri
+            posts_for_followings = get_post_for_following(user)
+            # Önerilen gönderiler
+            recommended_posts = get_recommendations(user=request.user, limit=10)
 
             # takipçiler 
             followers = author.followers.all()         
