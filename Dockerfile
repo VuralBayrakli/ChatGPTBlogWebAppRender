@@ -11,7 +11,11 @@ RUN python -m venv /py && \
         build-base postgresql-dev musl-dev linux-headers && \
     /py/bin/pip install -r /requirements.txt && \
     apk del .tmp-deps && \
-    adduser --disabled-password --no-create-home ChatGPTBlogWebAppRender
+    adduser --disabled-password --no-create-home ChatGPTBlogWebAppRender && \
+    mkdir -p /library && \
+    mkdir -p /static && \
+    chmod -R 755 /library  && \
+    chmod -R 755 /static 
 
 ENV PATH="/scripts:/py/bin:$PATH"
 
