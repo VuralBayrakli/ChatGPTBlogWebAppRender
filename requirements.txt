@@ -14,4 +14,3 @@ django-allauth
 gunicorn
 dj-database-url
 python-dotenv
-docker-compose
