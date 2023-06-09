@@ -1,4 +1,4 @@
-const API_KEY = "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";
+const API_KEY = "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";
 const titleInput = document.querySelector("#id_title");
 const suggestionDiv = document.querySelector("#suggestion-div");
 

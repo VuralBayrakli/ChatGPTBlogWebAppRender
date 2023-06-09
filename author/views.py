@@ -1,7 +1,8 @@
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib.auth.decorators import login_required
-
+import openai
+import requests
 from author.forms import *
 from author.models import *
 from django.http import JsonResponse
@@ -53,6 +54,30 @@ def delDraft(request, draft_id):
     else:
         return HttpResponse("Yetkisiz erişim")
 
+def generate_text(prompt):
+    URL = "https://api.openai.com/v1/chat/completions"
+    message = prompt
+    payload = {
+    "model": "gpt-3.5-turbo",
+    "messages": [{"role": "user", "content": f" Metnin etiketlerini alarak numaralı şekilde listelemek istiyorum. Lütfen aşağıdaki metin kutusuna bir metin girin: Metin: {message}. etiketleri '#' işareti ile ayrılarak yazın"}],
+    "messages": [{"role": "user", "content": f"Please provide a text input for which you would like me to generate tags. Once you provide the input, I will generate #tag1, #tag2 formatted tags for it. Please enter your input below: {message}."}], 
+    "temperature" : 1.0,
+    "top_p":1.0,
+    "n" : 5,
+    
+    "presence_penalty":0,
+    "frequency_penalty":0,
+    }
+
+    headers = {
+    "Content-Type": "application/json",
+    "Authorization": f"Bearer {openai.api_key}"
+    }
+
+    response = requests.post(URL, headers=headers, json=payload, stream=False)
+    reply = response.json()
+    
+    return reply
 
 # site/author/publish/<draft_id>
 # template: author/publish.html
@@ -61,6 +86,12 @@ def publish(request, draft_id):
     record = get_object_or_404(Draft, pk=draft_id)
     author = Author.objects.get(user = request.user)
 
+    openai.api_key = "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"
+    message = generate_text(record.content)
+    data = message["choices"]
+    content_list = [item['message']['content'] for item in data]
+    content_list = content_list[0].split("#")[1:4]
+    print(content_list)
     try:
         blog = Blog.objects.get(draft=record)
     except Blog.DoesNotExist:
@@ -94,7 +125,9 @@ def publish(request, draft_id):
                 tags = ",".join([tag.name for tag in blog.tags.all()])
                 form = PublishForm(instance=blog, initial={"tags":tags})
             else:
-                form = PublishForm()
+                description = " ".join(content_list)
+                tags = ",".join(content_list)
+                form = PublishForm(initial={"tags":tags, "description":description})
 
         return render(request, "author/publish.html", {"form":form})
     else:

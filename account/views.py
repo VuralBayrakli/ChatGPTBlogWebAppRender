@@ -71,10 +71,10 @@ def register_request(request):
                 user.save()
                 user_profile = UserProfile()
                 user_profile.user = user
-                '''with open('static/img/profil.png', 'rb') as f:
+                with open('static/img/profil.png', 'rb') as f:
                     default_profile_picture = File(f)
                     
-                    user_profile.profile_picture.save('profil.png', default_profile_picture)'''
+                    user_profile.profile_picture.save('profil.png', default_profile_picture)
                 user_profile.save()
 
                 user = authenticate(username=username, password=password)

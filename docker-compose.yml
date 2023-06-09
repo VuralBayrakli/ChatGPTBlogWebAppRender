@@ -3,7 +3,7 @@ services:
   app:
     build: .  
     volumes:
-      - .:/ChatGPTBlogWebAppRender
+      - .:/ChatGPTBlogWebApp
     ports:
       - "8000:8000"
     
