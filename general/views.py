@@ -30,35 +30,46 @@ import openai
 import requests
 
 
-def generate_text(prompt):
-    URL = "https://api.openai.com/v1/chat/completions"
-    message = prompt
-    payload = {
-    "model": "gpt-3.5-turbo",
-    "messages": [{"role": "user", "content": f" Metnin etiketlerini alarak numaralı şekilde listelemek istiyorum. Lütfen aşağıdaki metin kutusuna bir metin girin: Metin: {message}. etiketleri '#' işareti ile ayrılarak yazın"}],
-    "messages": [{"role": "user", "content": f"Please provide a text input for which you would like me to generate tags. Once you provide the input, I will generate #tag1, #tag2 formatted tags for it. Please enter your input below: {message}."}], 
-    "temperature" : 1.0,
-    "top_p":1.0,
-    "n" : 5,
-    
-    "presence_penalty":0,
-    "frequency_penalty":0,
-    }
-
-    headers = {
-    "Content-Type": "application/json",
-    "Authorization": f"Bearer {openai.api_key}"
-    }
-
-    response = requests.post(URL, headers=headers, json=payload, stream=False)
-    reply = response.json()
-    
-    return reply
-
 
 def search_tag(request, tag):
     blogs = Blog.objects.filter(tags__name__in=[tag]).order_by('-interaction', '-date')
-    return render(request, 'general/index.html', {"blogs":blogs})
+
+    # En çok okunan gönderiler
+    most_read_posts = Blog.objects.all().order_by('-interaction', '-date')[:10]
+    
+    # taglara göre öneri
+    recommended_posts = get_posts_with_most_common_tags(num_tags=10)
+
+    # En çok beğenilen 10 gönderi
+    most_liked_posts = Blog.objects.annotate(like_count=Count('likes')).order_by('-like_count')[:10]
+
+    posts_for_followings = None
+    followings = None
+    followers = None
+    author = None
+
+    if request.user.is_authenticated:
+        user = request.user
+
+        try:
+            author = Author.objects.get(user=request.user)
+            # Takip edilenler
+            followings = user.following.all()
+            # Takip edilenlerin gönderileri
+            posts_for_followings = get_post_for_following(user)
+            print(posts_for_followings)
+            # Önerilen gönderiler
+            recommended_posts = get_recommendations(user=request.user, limit=10)
+
+            # takipçiler 
+            followers = author.followers.all() 
+                                  
+            
+        except:
+            author = None
+
+    return render(request, 'general/index.html', {"blogs":blogs, "most_read_posts":most_read_posts, "recommended_posts":recommended_posts, "most_liked_posts":most_liked_posts, "posts_for_followings":posts_for_followings, "followings":followings, "followers":followers, "author":author})
+
 
 def koklerine_ayir(text):
     object1 = MyService()
@@ -102,7 +113,7 @@ def koklerine_ayir(text):
 
 def metni_ara(query1):
     query = """
-    SELECT d.id, ab.stemmed_title, ab.stemmed_content, ab.stemmed_tags, ab.stemmed_author_user,
+    SELECT ab.id, ab.stemmed_title, ab.stemmed_content, ab.stemmed_tags, ab.stemmed_author_user,
     ts_rank(search_post, websearch_to_tsquery('simple', %s)) +
     ts_rank(search_post, websearch_to_tsquery('simple', %s)) AS rank
     FROM author_blog AS ab
@@ -116,8 +127,14 @@ def metni_ara(query1):
     with connections['default'].cursor() as cursor:
         cursor.execute(query, params)
         results = cursor.fetchall()
-        posts = Blog.objects.filter(id__in=[r[0] for r in results])
+        ids = [r[0] for r in results]
+        print(ids)
+        posts = Blog.objects.filter(id__in=ids)
+    
+    for r in results:
+        print(r[0])
 
+    print(posts)
     return posts
 
 # tag lara göre öneri için en çok bulunan tagları alıyoruz
@@ -148,7 +165,7 @@ def author_search(text):
     tokens = text.split()
     
     query = """
-    SELECT d.id, ab.author_id, ab.stemmed_author_name_surname,ab.stemmed_author_user,
+    SELECT ab.id, ab.author_id, ab.stemmed_author_name_surname,ab.stemmed_author_user,
     ts_rank(search_author, websearch_to_tsquery('simple', %s)) +
     ts_rank(search_author, websearch_to_tsquery('simple', %s)) AS rank
     FROM author_blog AS ab
@@ -182,6 +199,7 @@ def index(request):
     
     # taglara göre öneri
     recommended_posts = get_posts_with_most_common_tags(num_tags=10)
+    print(recommended_posts)
 
     # En çok beğenilen 10 gönderi
     most_liked_posts = Blog.objects.annotate(like_count=Count('likes')).order_by('-like_count')[:10]
@@ -206,6 +224,8 @@ def index(request):
             print(posts_for_followings)
             # Önerilen gönderiler
             recommended_posts = get_recommendations(user=request.user, limit=10)
+            
+            print(recommended_posts)
 
             # takipçiler 
             followers = author.followers.all() 
@@ -218,15 +238,18 @@ def index(request):
     if query1:
         
         # Metin arama
+        print(koklerine_ayir(query1))
         blogs = metni_ara(query1)
-        blogs = blogs.order_by('-interaction', '-date')
         print(blogs)
+        print("blogs")
+        for blog in blogs:
+            print(blog.draft.title)
+        blogs = blogs.order_by('-interaction', '-date')
+        
 
         # Yazar arama
         author_results = author_search(query1)
         author_results = Author.objects.filter(id__in=[r[1] for r in author_results])
-        print("author_results")
-        print(author_results)
         author_blogs = Blog.objects.filter(author__in=author_results).order_by('-interaction', '-date')
 
         if author_results: 
@@ -234,14 +257,18 @@ def index(request):
                 try:
                     if followings:
                         return render(request, 'general/index.html', {'blogs': blogs, 'authors': author_results, 'query': query1, 'author_blogs': author_blogs, 'most_read_posts': most_read_posts, 'most_liked_posts': most_liked_posts, 'posts_with_most_common_tags': recommended_posts, 'posts_for_followings': posts_for_followings, 'recommended_posts': recommended_posts, 'followings': followings}) 
+                    else:
+                        return render(request, 'general/index.html', {'blogs': blogs, 'authors': author_results, 'query': query1, 'author_blogs': author_blogs, 'most_read_posts': most_read_posts, 'most_liked_posts': most_liked_posts, 'posts_with_most_common_tags': recommended_posts, 'recommended_posts': recommended_posts})
                 except:
                     return render(request, 'general/index.html', {'blogs': blogs, 'authors': author_results, 'query': query1, 'author_blogs': author_blogs, 'most_read_posts': most_read_posts, 'most_liked_posts': most_liked_posts, 'posts_with_most_common_tags': recommended_posts, 'recommended_posts': recommended_posts})
         else:
-            print("author_results yok")
             try:
                 if followings:
                     return render(request, 'general/index.html', {'blogs': blogs, 'query': query1, 'most_read_posts': most_read_posts, 'most_liked_posts': most_liked_posts, 'posts_with_most_common_tags': recommended_posts, 'posts_for_followings': posts_for_followings, 'recommended_posts': recommended_posts, 'followings': followings}) 
+                else:
+                    return render(request, 'general/index.html', {'blogs': blogs, 'query': query1, 'most_read_posts': most_read_posts, 'most_liked_posts': most_liked_posts, 'posts_with_most_common_tags': recommended_posts, 'posts_for_followings': posts_for_followings, 'recommended_posts': recommended_posts, 'followings': followings})                   
             except:
+                
                 return render(request, 'general/index.html', {'blogs': blogs, 'query': query1, 'most_read_posts': most_read_posts, 'most_liked_posts': most_liked_posts, 'posts_with_most_common_tags': recommended_posts, 'recommended_posts': recommended_posts})
 
     else:
